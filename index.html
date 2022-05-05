@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<form action="/" method="post" id="form">
+  <div>
+    <input type="file" placeholder="file" name="input_upload_image" id="input_upload_image" />
+  </div>
+  <br/>
+</form>
+<div id="uploaded_image"></div>
+<script>
+  const inputfile_tag = document.querySelector("#input_upload_image")
+  const output_img_tag = document.querySelector("#uploaded_image")
+
+  inputfile_tag.addEventListener("change", () => {
+    //console.log(inputfile_tag.files[0])
+    upload_image(inputfile_tag.files[0])
+  })
+
+  const upload_image = (file) => {
+    output_img_tag.style.removeProperty("color")
+    output_img_tag.innerHTML = "...loading..."
+
+    if (!['image/jpeg', 'image/png'].includes(file.type)) {
+      output_img_tag.style.color = "#f00"
+      output_img_tag.innerHTML = "bad format! No image!"
+      inputfile_tag.value = ''
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      output_img_tag.style.color = "#f00"
+      output_img_tag.innerHTML = "very big!"
+      inputfile_tag.value = ''
+      return;
+    }
+
+    const form_data = new FormData()
+    form_data.append('sample_image', file)
+    console.log(form_data)
+
+    fetch("upload.php", {
+      method: "POST",
+      body: form_data
+    })
+    /*
+    .then(async response => {
+        try {
+            const data = await response.json()
+            return data
+        } catch(error) {
+            throw new Error("error while json parsing!")
+        }
+    })
+    */
+    .then(response => {
+      return data = new Promise((resolve, reject) => {
+        response.json()
+        .then((data) => resolve(data))
+        .catch((err) => reject(new Error("error while json parsing!")))
+      })
+    })
+    .then((responseData) => {
+      if (responseData.image_source) {
+        output_img_tag.innerHTML = `good! <br> <img style="width: 100%" src="${responseData.image_source}" />`
+        inputfile_tag.value = ''
+        return
+      }
+      throw new Error(responseData.error_name)
+    })
+
+    .catch((err) => {
+      console.log(err)
+      output_img_tag.style.color = "#f00"
+      output_img_tag.innerHTML = err
+    })
+  }
+
+</script>
+</body>
+</html>
