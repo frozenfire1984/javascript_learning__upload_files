@@ -3,133 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <title>Title</title>
-  <style type="text/css">
-    .uploaded_image figure {
-      margin-inline: 0;
-    }
-
-    .uploaded_image img {
-      width: 100%;
-    }
-
-    .uploaded_image .uploaded_image__item_size {
-      margin: 0;
-    }
-  </style>
+  <link rel="stylesheet" href="https://i.icomoon.io/public/temp/21c5eb6a22/UntitledProject/style.css">
+  <link href="style.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
 <form action="/" method="post" id="form">
   <div>
-    <input type="file" placeholder="file" name="input_upload_image" id="input_upload_image" multiple />
+    <input type="file" placeholder="file" name="input-upload-image" id="input-upload-image" multiple />
   </div>
   <br/>
+  <div id="prepare-summary"></div>
+  <hr/>
+  <button type="submit" id="button-submit">Upload</button>
+
+  <div id="uploaded-summary"></div>
 </form>
-<div id="prepare_summary"></div>
-<hr/>
-<div id="uploaded_summary"></div>
-<div id="uploaded_image" class="uploaded_image"></div>
-<template id="uploaded_image_template">
-  <div class="uploaded_image__item">
+<hr />
+<div id="uploaded-images" class="uploaded-images"></div>
+
+<template id="uploaded-images-template">
+  <div class="uploaded-images__item">
     <figure>
       <figcaption></figcaption>
       <img src="" alt=""/>
-      <p class="uploaded_image__item_size">
-        <span class="uploaded_image__item_size_value"></span>
-        <span class="uploaded_image__item_size_unit"> bytes</span>
+      <p class="uploaded-images__item-size">
+        <span class="uploaded-images__item-size-value"></span>
+        <span class="uploaded-images__item-size-unit"> bytes</span>
       </p>
     </figure>
-    <hr/>
   </div>
 </template>
 
-<script>
-  const inputfile_tag = document.querySelector("#input_upload_image")
-        prepare_summary_tag = document.querySelector("#prepare_summary")
-        uploaded_summary_tag = document.querySelector("#uploaded_summary")
-        uploaded_image_tag = document.querySelector("#uploaded_image")
+<template id="msg-template">
+  <div class="msg">
+    <div class="msg__icon-holder">
+      <i class="msg__icon icon-warning" hidden></i>
+      <i class="msg__icon icon-checkmark" hidden></i>
+    </div>
+    <div class="msg__content"></div>
+    <div class="msg__addition"></div>
+  </div>
+</template>
 
-  const uploaded_image_template_content = document.querySelector("#uploaded_image_template").content.cloneNode(true)
-        uploaded_image_figcaption = uploaded_image_template_content.querySelector("figcaption")
-        uploaded_image_target = uploaded_image_template_content.querySelector("img")
-        uploaded_image_size = uploaded_image_template_content.querySelector(".uploaded_image__item_size_value")
-
-  inputfile_tag.addEventListener("change", () => {
-    upload_image(inputfile_tag.files)
-  })
-
-  const upload_image = (files) => {
-    uploaded_image_tag.style.removeProperty("color")
-    uploaded_image_tag.innerHTML = "...loading..."
-
-    const form_data = new FormData()
-
-    for (let i = 0; i < files.length; i++) {
-      if (!['image/jpeg', 'image/png'].includes(files[i].type)) {
-        let div_tag = document.createElement("div")
-        div_tag.style.color = "#f00"
-        div_tag.innerHTML = `file ${files[i].name} is no image!`
-        prepare_summary_tag.append(div_tag)
-      } else if (files[i].size > 2 * 1024 * 1024) {
-        let div_tag = document.createElement("div")
-        div_tag.style.color = "#f00"
-        div_tag.innerHTML = `file ${files[i].name} is very big!`
-        prepare_summary_tag.append(div_tag)
-      } else {
-        let div_tag = document.createElement("div")
-        div_tag.style.color = "green"
-        div_tag.innerHTML = `file ${files[i].name} prepare to adding!`
-        prepare_summary_tag.append(div_tag)
-        form_data.append(`image_${i}`, files[i])
-      }
-    }
-
-    const backend_url_base = "http://localhost/javascript_learning__upload_files/backend"
-    fetch(`${backend_url_base}/upload.php`, {
-      method: "POST",
-      body: form_data
-    })
-    /*
-    //alternative variant
-    .then(async response => {
-        try {
-            const data = await response.json()
-            return data
-        } catch(error) {
-            throw new Error("error while json parsing!")
-        }
-    })
-    */
-    .then(response => {
-      return data = new Promise((resolve, reject) => {
-        response.json()
-        .then((data) => resolve(data))
-        .catch((err) => reject(new Error("error while json parsing!")))
-      })
-    })
-    .then((responseData) => {
-      console.log(responseData)
-      if (responseData.images_array) {
-        uploaded_image_tag.innerHTML = ""
-        responseData.images_array.forEach(item => {
-          uploaded_image_figcaption.textContent = item.image_source
-          uploaded_image_target.src = `${backend_url_base}/${item.image_source}`
-          uploaded_image_target.setAttribute("alt", item.image_source)
-          uploaded_image_size.textContent = item.file_size
-          uploaded_image_tag.append(uploaded_image_template_content.cloneNode(true))
-        });
-        return
-      }
-      throw new Error(responseData.error_name)
-    })
-
-    .catch((err) => {
-      console.log(err)
-      uploaded_summary_tag.style.color = "#f00"
-      uploaded_summary_tag.innerHTML = err
-      uploaded_image_tag.innerHTML = ""
-    })
-  }
-
-</script>
+<script src="script.js"></script>
 </body>
 </html>
