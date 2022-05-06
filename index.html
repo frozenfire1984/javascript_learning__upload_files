@@ -3,52 +3,93 @@
 <head>
   <meta charset="UTF-8">
   <title>Title</title>
+  <style type="text/css">
+    .uploaded_image figure {
+      margin-inline: 0;
+    }
+
+    .uploaded_image img {
+      width: 100%;
+    }
+
+    .uploaded_image .uploaded_image__item_size {
+      margin: 0;
+    }
+  </style>
 </head>
 <body>
 <form action="/" method="post" id="form">
   <div>
-    <input type="file" placeholder="file" name="input_upload_image" id="input_upload_image" />
+    <input type="file" placeholder="file" name="input_upload_image" id="input_upload_image" multiple />
   </div>
   <br/>
 </form>
-<div id="uploaded_image"></div>
+<div id="prepare_summary"></div>
+<hr/>
+<div id="uploaded_summary"></div>
+<div id="uploaded_image" class="uploaded_image"></div>
+<template id="uploaded_image_template">
+  <div class="uploaded_image__item">
+    <figure>
+      <figcaption></figcaption>
+      <img src="" alt=""/>
+      <p class="uploaded_image__item_size">
+        <span class="uploaded_image__item_size_value"></span>
+        <span class="uploaded_image__item_size_unit"> bytes</span>
+      </p>
+    </figure>
+    <hr/>
+  </div>
+</template>
+
 <script>
   const inputfile_tag = document.querySelector("#input_upload_image")
-  const output_img_tag = document.querySelector("#uploaded_image")
+        prepare_summary_tag = document.querySelector("#prepare_summary")
+        uploaded_summary_tag = document.querySelector("#uploaded_summary")
+        uploaded_image_tag = document.querySelector("#uploaded_image")
+
+  const uploaded_image_template_content = document.querySelector("#uploaded_image_template").content.cloneNode(true)
+        uploaded_image_figcaption = uploaded_image_template_content.querySelector("figcaption")
+        uploaded_image_target = uploaded_image_template_content.querySelector("img")
+        uploaded_image_size = uploaded_image_template_content.querySelector(".uploaded_image__item_size_value")
 
   inputfile_tag.addEventListener("change", () => {
-    //console.log(inputfile_tag.files[0])
-    upload_image(inputfile_tag.files[0])
+    upload_image(inputfile_tag.files)
   })
 
-  const upload_image = (file) => {
-    output_img_tag.style.removeProperty("color")
-    output_img_tag.innerHTML = "...loading..."
-
-    if (!['image/jpeg', 'image/png'].includes(file.type)) {
-      output_img_tag.style.color = "#f00"
-      output_img_tag.innerHTML = "bad format! No image!"
-      inputfile_tag.value = ''
-      return;
-    }
-
-    if (file.size > 2 * 1024 * 1024) {
-      output_img_tag.style.color = "#f00"
-      output_img_tag.innerHTML = "very big!"
-      inputfile_tag.value = ''
-      return;
-    }
+  const upload_image = (files) => {
+    uploaded_image_tag.style.removeProperty("color")
+    uploaded_image_tag.innerHTML = "...loading..."
 
     const form_data = new FormData()
-    form_data.append('sample_image', file)
-    //console.log(form_data)
 
-    const base_url = "http://localhost/javascript_learning__upload_files/backend"
-    fetch(`${base_url}/upload.php`, {
+    for (let i = 0; i < files.length; i++) {
+      if (!['image/jpeg', 'image/png'].includes(files[i].type)) {
+        let div_tag = document.createElement("div")
+        div_tag.style.color = "#f00"
+        div_tag.innerHTML = `file ${files[i].name} is no image!`
+        prepare_summary_tag.append(div_tag)
+      } else if (files[i].size > 2 * 1024 * 1024) {
+        let div_tag = document.createElement("div")
+        div_tag.style.color = "#f00"
+        div_tag.innerHTML = `file ${files[i].name} is very big!`
+        prepare_summary_tag.append(div_tag)
+      } else {
+        let div_tag = document.createElement("div")
+        div_tag.style.color = "green"
+        div_tag.innerHTML = `file ${files[i].name} prepare to adding!`
+        prepare_summary_tag.append(div_tag)
+        form_data.append(`image_${i}`, files[i])
+      }
+    }
+
+    const backend_url_base = "http://localhost/javascript_learning__upload_files/backend"
+    fetch(`${backend_url_base}/upload.php`, {
       method: "POST",
       body: form_data
     })
     /*
+    //alternative variant
     .then(async response => {
         try {
             const data = await response.json()
@@ -66,17 +107,26 @@
       })
     })
     .then((responseData) => {
-      if (responseData.image_source) {
-        output_img_tag.innerHTML = `good! <br> <img style="width: 100%" src="${base_url}/${responseData.image_source}" />`
-        inputfile_tag.value = ''
+      console.log(responseData)
+      if (responseData.images_array) {
+        uploaded_image_tag.innerHTML = ""
+        responseData.images_array.forEach(item => {
+          uploaded_image_figcaption.textContent = item.image_source
+          uploaded_image_target.src = `${backend_url_base}/${item.image_source}`
+          uploaded_image_target.setAttribute("alt", item.image_source)
+          uploaded_image_size.textContent = item.file_size
+          uploaded_image_tag.append(uploaded_image_template_content.cloneNode(true))
+        });
         return
       }
       throw new Error(responseData.error_name)
     })
+
     .catch((err) => {
       console.log(err)
-      output_img_tag.style.color = "#f00"
-      output_img_tag.innerHTML = err
+      uploaded_summary_tag.style.color = "#f00"
+      uploaded_summary_tag.innerHTML = err
+      uploaded_image_tag.innerHTML = ""
     })
   }
 
