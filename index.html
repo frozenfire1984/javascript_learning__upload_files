@@ -41,9 +41,10 @@
 
     const form_data = new FormData()
     form_data.append('sample_image', file)
-    console.log(form_data)
+    //console.log(form_data)
 
-    fetch("upload.php", {
+    const base_url = "http://localhost/javascript_learning__upload_files/backend"
+    fetch(`${base_url}/upload.php`, {
       method: "POST",
       body: form_data
     })
@@ -66,13 +67,12 @@
     })
     .then((responseData) => {
       if (responseData.image_source) {
-        output_img_tag.innerHTML = `good! <br> <img style="width: 100%" src="${responseData.image_source}" />`
+        output_img_tag.innerHTML = `good! <br> <img style="width: 100%" src="${base_url}/${responseData.image_source}" />`
         inputfile_tag.value = ''
         return
       }
       throw new Error(responseData.error_name)
     })
-
     .catch((err) => {
       console.log(err)
       output_img_tag.style.color = "#f00"
