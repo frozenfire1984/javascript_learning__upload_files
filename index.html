@@ -7,17 +7,52 @@
   <link href="style.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
-<form action="/" method="post" id="form">
-  <div>
-    <input type="file" placeholder="file" name="input-upload-image" id="input-upload-image" multiple />
-  </div>
-  <br/>
-  <div id="prepare-summary"></div>
-  <hr/>
-  <button type="submit" id="button-submit">Upload</button>
 
-  <div id="uploaded-summary"></div>
-</form>
+<div class="form">
+  <form action="/" method="post" id="form">
+    <div class="form__item">
+      <label for="input-upload-image">Images</label>
+      <input
+        class="form__input"
+        type="file"
+        name="input-upload-image"
+        id="input-upload-image"
+        multiple />
+    </div>
+
+    <div class="form__item">
+      <label for="input-title">Title</label>
+      <input
+        required
+        class="form__input"
+        type="text"
+        name="input-title"
+        id="input-title"/>
+    </div>
+
+    <div class="form__item">
+      <label for="input-desc">Description</label>
+      <textarea
+        required
+        class="form__input"
+        name="input-desc"
+        id="input-desc"></textarea>
+    </div>
+
+    <div class="form__item">
+      <label for="input-price">Price</label>
+      <input
+        class="form__input"
+        type="number"
+        name="input-price"
+        id="input-price"/>
+    </div>
+    <div id="prepare-summary"></div>
+    <hr/>
+    <button type="submit" id="button-submit">Upload</button>
+    <div id="uploaded-summary"></div>
+  </form>
+</div>
 <hr />
 <div id="uploaded-images" class="uploaded-images"></div>
 

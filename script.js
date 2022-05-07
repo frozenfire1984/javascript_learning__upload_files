@@ -50,6 +50,25 @@ const upload_image = (e) => {
 		prepare_summary_tag.replaceChildren(generate_msg(msg_class_error, "dont check files!"))
 		return false
 	}
+	
+	const form_data_input = new FormData(form_tag)
+	
+	//console.log([...form_data_input])
+	
+	form_data_input.forEach((key, item) => {
+		form_data.append(item, key)
+		//console.log(item)
+		//console.log(key)
+	})
+	
+	form_data.delete("input-upload-image")
+	
+	
+	
+	//console.log([...form_data])
+	
+	
+	
 	//form_data.delete('image_0') //for testing backend exception
 	uploaded_images_tag.innerHTML = "...loading..."
 	button_submit_tag.disabled = true

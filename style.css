@@ -1,3 +1,23 @@
+*,::before,::after {
+    box-sizing: border-box;
+}
+
+.form {
+    width: clamp(200px, 70%, 700px);
+}
+
+.form .form__item {
+    margin-block: 20px;
+}
+
+.form label {
+    display: block;
+}
+
+.form__input {
+    width: 100%;
+}
+
 .uploaded-images {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
